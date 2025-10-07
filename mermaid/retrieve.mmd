@@ -8,38 +8,23 @@ sequenceDiagram
     participant DB as 部品カテゴリー情報テーブル
 
     User->>Controller: GET /admin/CategoryInfo/search?keyword=xxx
-    Controller->>Form: getSearchCategoryInfoData(form)
-    Form-->Validator: validate() // バリデーションチェック
-    Controller-->>User: return /admin/categoryInfo/register // 登録画面を表示
-
-    User->>Controller: POST /admin/categoryInfo/register // 登録情報を渡す
+    Controller->>Form: checkData(form)
     Form->>Validator: validate() // バリデーションチェック
+    Validator-->>Form:
+    Form-->>Controller:
 
     alt 入力エラーあり
+        Controller->> Form: getErrorMessage()
+        Form->>Validator:getErrorMessage()
         Validator-->>Form: エラーメッセージ設定
-        Form-->>Controller: エラーメッセージ送信
-        Controller-->>User: エラーメッセージ表示
-        Controller-->>User: return /admin/categoryInfo/register // 登録画面を表示
+        Form-->>Controller: 
+        Controller-->>User: return /admin/categoryInfo/index   // 検索画面にエラーメッセージを表示
     else 正常処理
-        Controller->>Service: saveCategoryInfoData(form) // 入力データに応じて在庫センター情報登録の指示
-        
-        critical トランザクション
-            Service->>Repository: saveCategoryInfo(form) // 業務データ入出力の指示
-            Repository->>DB: INSERT INTO category_info // formに応じてデータ登録
-
-            alt データ登録中にエラーが発生
-                Service->>DB: データロールバック
-            else 正常処理
-                Service->>DB: データをコミットする
-            end
-        end
-
-        alt データ登録中にエラーが発生していた場合
-            Service-->>Controller: エラーメッセージ送信
-            Controller-->>User: エラーメッセージ表示
-            Controller-->>User: return /admin/categoryInfo/register // 登録画面を表示
-        else 正常処理
-            Controller-->>User: addFlashAttribute() // 登録メッセージを表示
-            Controller-->>User: redirect: /admin/CategoryInfo/index // 部品カテゴリー 初期表示へリダイレクト
-        end
+        Controller->>Service: getCategoryInfoData(form) // 部品カテゴリリストのキーワード検索する
+        Service->> Repository: findByKeyword(form.keyword)
+        Repository->>DB: SELECT * FROm category_info WHERE name like ? 
+        DB->> Repository: 部品カテゴリリスト返却
+        Repository->>Service: 部品カテゴリリスト返却
+        Service->>Controller: 部品カテゴリリスト返却
+        Controller-->>User: return /admin/CategoryInfo/index  // 部品カテゴリー一覧画面へ
     end
