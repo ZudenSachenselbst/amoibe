@@ -10,7 +10,8 @@ sequenceDiagram
     User->>Controller: GET /admin/CategoryInfo/search?keyword=xxx
     Controller->>Form: getSearchCategoryInfoData(form)
     Form->>Validator: validate() // バリデーションチェック
-    Form<<-Validator:
+    %% Form<<-Validator:
+    Validator->>Form:
     Controller-->>User: return /admin/categoryInfo/register // 登録画面を表示
 
     User->>Controller: POST /admin/categoryInfo/register // 登録情報を渡す
