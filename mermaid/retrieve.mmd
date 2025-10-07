@@ -22,7 +22,7 @@ sequenceDiagram
     else 正常処理
         Controller->>Service: getCategoryInfoData(form) // 部品カテゴリリストのキーワード検索する
         Service->> Repository: findByKeyword(form.keyword)
-        Repository->>DB: SELECT * FROm category_info WHERE name like ? 
+        Repository->>DB: SELECT * FROm category_info WHERE name like '%xxx%'
         DB->> Repository: 部品カテゴリリスト返却
         Repository->>Service: 部品カテゴリリスト返却
         Service->>Controller: 部品カテゴリリスト返却
